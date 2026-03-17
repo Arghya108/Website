@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feather — Wear Nothing But Light</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #F4EFE6;
+      --ink:      #1C1814;
+      --muted:    #8A7F75;
+      --accent:   #B5845A;
+      --accent2:  #D4B896;
+      --light:    #EDE7DC;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── Custom Cursor ── */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, width 0.3s ease, height 0.3s ease, background 0.3s ease;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.35s cubic-bezier(.25,.46,.45,.94), opacity 0.3s ease;
+      opacity: 0.6;
+    }
+
+    /* ── Grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.4;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 52px;
+      mix-blend-mode: multiply;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      opacity: 0; animation: fadeDown 0.8s 0.2s forwards;
+    }
+    .nav-links {
+      display: flex; gap: 36px; list-style: none;
+      opacity: 0; animation: fadeDown 0.8s 0.4s forwards;
+    }
+    .nav-links a {
+      font-size: 0.72rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--ink);
+      text-decoration: none; font-weight: 400;
+      position: relative; padding-bottom: 2px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute;
+      bottom: 0; left: 0; width: 0; height: 1px;
+      background: var(--accent);
+      transition: width 0.35s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      opacity: 0; animation: fadeDown 0.8s 0.6s forwards;
+    }
+    .nav-cta a {
+      font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--ink);
+      text-decoration: none; font-weight: 500;
+      border: 1px solid var(--ink); padding: 10px 24px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .nav-cta a:hover { background: var(--ink); color: var(--bg); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Left column */
+    .hero-left {
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 52px 80px 52px;
+      position: relative; z-index: 2;
+    }
+    .hero-eyebrow {
+      font-size: 0.68rem; letter-spacing: 0.32em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 24px;
+      opacity: 0; animation: fadeUp 1s 0.7s forwards;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4.5rem, 9vw, 9rem);
+      font-weight: 300; line-height: 0.88;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .hero-title .line {
+      display: block; overflow: hidden;
+    }
+    .hero-title .line span {
+      display: block;
+      opacity: 0;
+      transform: translateY(100%);
+      animation: slideUp 1s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .hero-title .line:nth-child(1) span { animation-delay: 0.6s; }
+    .hero-title .line:nth-child(2) span { animation-delay: 0.8s; }
+    .hero-title .line:nth-child(3) span { animation-delay: 1.0s; }
+
+    .hero-title em {
+      font-style: italic; color: var(--accent);
+    }
+    .hero-desc {
+      margin-top: 36px;
+      font-size: 0.85rem; line-height: 1.8;
+      color: var(--muted); max-width: 320px;
+      opacity: 0; animation: fadeUp 1s 1.4s forwards;
+    }
+    .hero-actions {
+      margin-top: 48px; display: flex; align-items: center; gap: 32px;
+      opacity: 0; animation: fadeUp 1s 1.6s forwards;
+    }
+    .btn-primary {
+      background: var(--ink); color: var(--bg);
+      padding: 16px 40px;
+      font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; text-decoration: none;
+      font-family: 'DM Sans', sans-serif; font-weight: 500;
+      border: 1px solid var(--ink);
+      transition: background 0.35s, color 0.35s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: transparent; color: var(--ink); }
+    .btn-ghost {
+      font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; text-decoration: none;
+      color: var(--muted); display: flex; align-items: center; gap: 10px;
+      transition: color 0.3s;
+    }
+    .btn-ghost:hover { color: var(--ink); }
+    .btn-ghost svg { transition: transform 0.3s; }
+    .btn-ghost:hover svg { transform: translateX(5px); }
+
+    /* Right column – image stack */
+    .hero-right {
+      position: relative; overflow: hidden;
+    }
+    .hero-img-main {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg, #D9CAB8 0%, #C5B09A 40%, #A8916F 100%);
+      clip-path: polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%);
+      opacity: 0; animation: fadeIn 1.2s 0.5s forwards;
+    }
+
+    /* Floating model silhouette */
+    .hero-img-main::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 60%; height: 90%;
+      background: linear-gradient(180deg, transparent 0%, rgba(28,24,20,0.08) 100%);
+    }
+
+    /* Decorative SVG feather */
+    .feather-deco {
+      position: absolute; top: 18%; right: 6%;
+      width: 120px; opacity: 0.18;
+      animation: floatY 6s ease-in-out infinite, fadeIn 1s 1.2s both;
+    }
+
+    /* Vertical text */
+    .hero-vert-text {
+      position: absolute; right: 52px; top: 50%; transform: translateY(-50%) rotate(90deg);
+      transform-origin: center;
+      font-size: 0.6rem; letter-spacing: 0.5em; text-transform: uppercase;
+      color: var(--muted); white-space: nowrap;
+      opacity: 0; animation: fadeIn 1s 2s forwards;
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute; bottom: 40px; left: 52px;
+      display: flex; align-items: center; gap: 16px;
+      font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0; animation: fadeUp 0.8s 2.2s forwards;
+    }
+    .scroll-line {
+      width: 48px; height: 1px; background: var(--accent2);
+      position: relative; overflow: hidden;
+    }
+    .scroll-line::after {
+      content: ''; position: absolute;
+      top: 0; left: -100%; width: 100%; height: 100%;
+      background: var(--accent);
+      animation: scrollSlide 2s 2.5s ease-in-out infinite;
+    }
+
+    /* Collection strip */
+    .collection-strip {
+      border-top: 1px solid rgba(28,24,20,0.1);
+      padding: 20px 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--light);
+    }
+    .strip-label {
+      font-size: 0.6rem; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .strip-tags { display: flex; gap: 32px; }
+    .strip-tags span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; font-weight: 400;
+      color: var(--ink); letter-spacing: 0.06em;
+      cursor: pointer; transition: color 0.3s;
+    }
+    .strip-tags span:hover { color: var(--accent); }
+    .strip-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.8rem; color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Featured section ── */
+    .featured {
+      padding: 120px 52px;
+    }
+    .section-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 64px;
+    }
+    .section-label {
+      font-size: 0.62rem; letter-spacing: 0.4em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-weight: 300; line-height: 1.1;
+    }
+    .section-link {
+      font-size: 0.68rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+      transition: color 0.3s;
+    }
+    .section-link:hover { color: var(--accent); }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 24px;
+    }
+    .product-card {
+      position: relative; overflow: hidden; cursor: pointer;
+    }
+    .product-card:hover .product-img { transform: scale(1.04); }
+    .product-card:hover .product-overlay { opacity: 1; }
+
+    .product-img {
+      width: 100%; aspect-ratio: 3/4;
+      transition: transform 0.7s cubic-bezier(.25,.46,.45,.94);
+      position: relative;
+    }
+    .product-img-bg {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    /* Placeholder product images via gradient */
+    .card-1 .product-img { background: linear-gradient(145deg, #C8B89A, #9E8264); }
+    .card-2 .product-img { background: linear-gradient(145deg, #B8C4C8, #7A9099); }
+    .card-3 .product-img { background: linear-gradient(145deg, #D4C4B0, #AA9278); }
+
+    .product-overlay {
+      position: absolute; inset: 0;
+      background: rgba(28,24,20,0.35);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.4s ease;
+    }
+    .product-overlay a {
+      font-size: 0.68rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--bg);
+      text-decoration: none; border: 1px solid var(--bg);
+      padding: 12px 28px;
+      transform: translateY(8px);
+      transition: transform 0.35s ease, background 0.3s;
+    }
+    .product-overlay a:hover { background: var(--bg); color: var(--ink); }
+    .product-card:hover .product-overlay a { transform: translateY(0); }
+
+    .product-info { margin-top: 18px; }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+    .product-meta {
+      display: flex; justify-content: space-between;
+      margin-top: 6px;
+    }
+    .product-material {
+      font-size: 0.68rem; letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .product-price {
+      font-size: 0.78rem; letter-spacing: 0.08em;
+      color: var(--ink);
+    }
+    .product-badge {
+      position: absolute; top: 18px; left: 18px;
+      font-size: 0.55rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--bg);
+      background: var(--accent); padding: 5px 12px;
+    }
+
+    /* ── Editorial Banner ── */
+    .editorial {
+      margin: 0 52px 120px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      min-height: 520px; position: relative; overflow: hidden;
+    }
+    .editorial-img {
+      background: linear-gradient(135deg, #2E2318 0%, #5C4332 50%, #8A6248 100%);
+      position: relative;
+    }
+    .editorial-img::after {
+      content: 'F';
+      position: absolute; bottom: -30px; right: -20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22rem; font-weight: 600;
+      color: rgba(255,255,255,0.04); line-height: 1;
+      pointer-events: none;
+    }
+    .editorial-content {
+      background: var(--ink); color: var(--bg);
+      padding: 72px 64px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .editorial-content .section-label { color: var(--accent2); }
+    .editorial-content .section-title { color: var(--bg); margin-bottom: 28px; }
+    .editorial-content p {
+      font-size: 0.88rem; line-height: 1.9;
+      color: rgba(244,239,230,0.6); max-width: 380px;
+      margin-bottom: 48px;
+    }
+    .btn-light {
+      display: inline-block;
+      border: 1px solid var(--accent2); color: var(--accent2);
+      padding: 14px 36px;
+      font-size: 0.68rem; letter-spacing: 0.2em;
+      text-transform: uppercase; text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.3s, color 0.3s; align-self: flex-start;
+    }
+    .btn-light:hover { background: var(--accent2); color: var(--ink); }
+
+    /* ── Marquee ── */
+    .marquee-wrap {
+      border-top: 1px solid rgba(28,24,20,0.1);
+      border-bottom: 1px solid rgba(28,24,20,0.1);
+      padding: 20px 0; overflow: hidden;
+      margin-bottom: 120px;
+    }
+    .marquee-track {
+      display: flex; gap: 72px;
+      white-space: nowrap;
+      animation: marquee 20s linear infinite;
+    }
+    .marquee-item {
+      display: flex; align-items: center; gap: 24px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 300; font-style: italic;
+      color: var(--muted); flex-shrink: 0;
+    }
+    .marquee-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
+    }
+
+    /* ── Testimonials ── */
+    .testimonials {
+      padding: 0 52px 120px;
+    }
+    .testi-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 2px;
+      margin-top: 64px;
+    }
+    .testi-card {
+      background: var(--light); padding: 52px 44px;
+      position: relative;
+    }
+    .testi-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-weight: 300; font-style: italic;
+      line-height: 1.7; margin-bottom: 32px; color: var(--ink);
+    }
+    .testi-author {
+      font-size: 0.62rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .testi-stars {
+      position: absolute; top: 44px; right: 44px;
+      color: var(--accent); font-size: 0.7rem; letter-spacing: 3px;
+    }
+
+    /* ── Newsletter ── */
+    .newsletter {
+      background: var(--ink); color: var(--bg);
+      padding: 100px 52px; text-align: center;
+    }
+    .newsletter .section-label { color: var(--accent2); text-align: center; }
+    .newsletter-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      font-weight: 300; margin: 16px 0 12px; line-height: 1.1;
+      color: var(--bg);
+    }
+    .newsletter-sub {
+      font-size: 0.82rem; color: rgba(244,239,230,0.5);
+      margin-bottom: 48px; line-height: 1.8;
+    }
+    .newsletter-form {
+      display: flex; justify-content: center; max-width: 500px; margin: 0 auto;
+      gap: 0;
+    }
+    .newsletter-form input {
+      flex: 1; padding: 16px 24px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-right: none;
+      color: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; letter-spacing: 0.05em;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .newsletter-form input::placeholder { color: rgba(244,239,230,0.3); }
+    .newsletter-form input:focus { border-color: var(--accent2); }
+    .newsletter-form button {
+      padding: 16px 32px;
+      background: var(--accent); border: 1px solid var(--accent); color: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.3s; white-space: nowrap;
+    }
+    .newsletter-form button:hover { background: var(--accent2); border-color: var(--accent2); }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--light);
+      padding: 80px 52px 40px;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 64px; margin-bottom: 80px;
+    }
+    .footer-brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 300; letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+    .footer-tagline {
+      font-size: 0.78rem; line-height: 1.8; color: var(--muted);
+      max-width: 280px; margin-bottom: 32px;
+    }
+    .footer-socials { display: flex; gap: 18px; }
+    .footer-socials a {
+      width: 36px; height: 36px; border: 1px solid rgba(28,24,20,0.2);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; color: var(--muted);
+      font-size: 0.65rem; letter-spacing: 0.1em;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .footer-socials a:hover { border-color: var(--accent); color: var(--accent); }
+    .footer-col h4 {
+      font-size: 0.6rem; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--ink);
+      margin-bottom: 24px; font-weight: 500;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 12px; }
+    .footer-col ul li a {
+      font-size: 0.82rem; color: var(--muted);
+      text-decoration: none; transition: color 0.3s;
+    }
+    .footer-col ul li a:hover { color: var(--accent); }
+    .footer-bottom {
+      border-top: 1px solid rgba(28,24,20,0.1);
+      padding-top: 32px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-bottom p {
+      font-size: 0.65rem; letter-spacing: 0.1em; color: var(--muted);
+    }
+    .footer-bottom-links { display: flex; gap: 24px; }
+    .footer-bottom-links a {
+      font-size: 0.65rem; letter-spacing: 0.1em;
+      color: var(--muted); text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-bottom-links a:hover { color: var(--accent); }
+
+    /* ── Animations ── */
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+    @keyframes slideUp  { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
+    @keyframes floatY   { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-18px); } }
+    @keyframes scrollSlide { 0%{ left:-100%; } 100%{ left:100%; } }
+    @keyframes marquee  { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+
+    /* ── Scroll reveal ── */
+    .reveal { opacity:0; transform:translateY(36px); transition: opacity 0.9s ease, transform 0.9s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.25s; }
+    .reveal-delay-3 { transition-delay: 0.4s; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      nav { padding: 22px 28px; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { min-height: 55vw; }
+      .hero-img-main { clip-path: none; }
+      .hero-left { padding: 180px 28px 60px; }
+      .hero-vert-text { display: none; }
+      .collection-strip, .featured, .editorial, .testimonials, footer { padding-left: 28px; padding-right: 28px; }
+      .product-grid { grid-template-columns: 1fr 1fr; }
+      .product-grid .card-1 { grid-column: span 2; }
+      .editorial { grid-template-columns: 1fr; margin: 0 28px 80px; }
+      .editorial-img { min-height: 260px; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .testi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="#">Feather</a>
+    <ul class="nav-links">
+      <li><a href="#">Collections</a></li>
+      <li><a href="#">Women</a></li>
+      <li><a href="#">Men</a></li>
+      <li><a href="#">Editorial</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <div class="nav-cta"><a href="#">Shop Now</a></div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">New Collection — SS 2026</p>
+      <h1 class="hero-title">
+        <span class="line"><span>Wear</span></span>
+        <span class="line"><span><em>Nothing</em></span></span>
+        <span class="line"><span>But Light.</span></span>
+      </h1>
+      <p class="hero-desc">
+        Garments woven from the finest natural fibres. Designed to move with you — never against you. Effortless elegance, season after season.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#">Explore Collection</a>
+        <a class="btn-ghost" href="#">
+          Our Story
+          <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
+            <path d="M1 5h16M12 1l5 4-5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-img-main">
+        <!-- Decorative SVG feather -->
+        <svg class="feather-deco" viewBox="0 0 120 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 10 Q90 60 80 130 Q70 200 60 270" stroke="white" stroke-width="1.5" fill="none"/>
+          <path d="M60 10 Q30 60 40 130 Q50 200 60 270" stroke="white" stroke-width="1.5" fill="none"/>
+          <path d="M60 50 Q85 70 75 100" stroke="white" stroke-width="0.8" fill="none"/>
+          <path d="M60 50 Q35 70 45 100" stroke="white" stroke-width="0.8" fill="none"/>
+          <path d="M60 90 Q88 108 76 140" stroke="white" stroke-width="0.8" fill="none"/>
+          <path d="M60 90 Q32 108 44 140" stroke="white" stroke-width="0.8" fill="none"/>
+          <path d="M60 130 Q86 148 74 178" stroke="white" stroke-width="0.8" fill="none"/>
+          <path d="M60 130 Q34 148 46 178" stroke="white" stroke-width="0.8" fill="none"/>
+          <path d="M60 168 Q82 186 72 210" stroke="white" stroke-width="0.6" fill="none"/>
+          <path d="M60 168 Q38 186 48 210" stroke="white" stroke-width="0.6" fill="none"/>
+        </svg>
+      </div>
+      <div class="hero-vert-text">SS 2026 — Feather Collection</div>
+    </div>
+
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      Scroll to explore
+    </div>
+  </section>
+
+  <!-- Collection Strip -->
+  <div class="collection-strip reveal">
+    <span class="strip-label">Shop by category</span>
+    <div class="strip-tags">
+      <span>Outerwear</span>
+      <span>Essentials</span>
+      <span>Formalwear</span>
+      <span>Loungewear</span>
+      <span>Accessories</span>
+    </div>
+    <span class="strip-num">148 pieces</span>
+  </div>
+
+  <!-- Featured Products -->
+  <section class="featured">
+    <div class="section-header reveal">
+      <div>
+        <p class="section-label">Featured Pieces</p>
+        <h2 class="section-title">Crafted for<br>the aware.</h2>
+      </div>
+      <a class="section-link" href="#">
+        View all pieces
+        <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
+          <path d="M1 5h16M12 1l5 4-5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="product-grid">
+      <div class="product-card card-1 reveal">
+        <div class="product-img"></div>
+        <div class="product-badge">New</div>
+        <div class="product-overlay"><a href="#">Quick View</a></div>
+        <div class="product-info">
+          <p class="product-name">Airi Linen Overcoat</p>
+          <div class="product-meta">
+            <span class="product-material">100% Belgian Linen</span>
+            <span class="product-price">$298</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card card-2 reveal reveal-delay-1">
+        <div class="product-img"></div>
+        <div class="product-overlay"><a href="#">Quick View</a></div>
+        <div class="product-info">
+          <p class="product-name">Haze Knit Set</p>
+          <div class="product-meta">
+            <span class="product-material">Merino Wool</span>
+            <span class="product-price">$185</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card card-3 reveal reveal-delay-2">
+        <div class="product-img"></div>
+        <div class="product-badge">Low Stock</div>
+        <div class="product-overlay"><a href="#">Quick View</a></div>
+        <div class="product-info">
+          <p class="product-name">Drift Silk Blouse</p>
+          <div class="product-meta">
+            <span class="product-material">Pure Mulberry Silk</span>
+            <span class="product-price">$220</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span class="marquee-item">Conscious Design <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Natural Fibres <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Timeless Silhouettes <span class="marquee-dot"></span></span>
+      <span class="marquee-item">SS 2026 Collection <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Crafted with Intention <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Free Worldwide Shipping <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Conscious Design <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Natural Fibres <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Timeless Silhouettes <span class="marquee-dot"></span></span>
+      <span class="marquee-item">SS 2026 Collection <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Crafted with Intention <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Free Worldwide Shipping <span class="marquee-dot"></span></span>
+    </div>
+  </div>
+
+  <!-- Editorial Banner -->
+  <div class="editorial reveal">
+    <div class="editorial-img"></div>
+    <div class="editorial-content">
+      <p class="section-label">The Feather Philosophy</p>
+      <h2 class="section-title">Less noise.<br>More presence.</h2>
+      <p>
+        We believe in the power of restraint. Every Feather piece is designed to outlast trends — made from materials that breathe, move, and age beautifully alongside the person wearing them.
+      </p>
+      <a class="btn-light" href="#">Read Our Story</a>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="section-header reveal">
+      <div>
+        <p class="section-label">What They Say</p>
+        <h2 class="section-title">Worn. Loved.<br>Lived in.</h2>
+      </div>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <p class="testi-stars">★ ★ ★ ★ ★</p>
+        <p class="testi-quote">"I've never owned a coat that feels this effortless. People ask me about it every single time I wear it."</p>
+        <p class="testi-author">Amara L. — Lagos</p>
+      </div>
+      <div class="testi-card reveal reveal-delay-1">
+        <p class="testi-stars">★ ★ ★ ★ ★</p>
+        <p class="testi-quote">"Feather understands that luxury is not about logos. It's about how something makes you feel when you put it on."</p>
+        <p class="testi-author">Kenji M. — Tokyo</p>
+      </div>
+      <div class="testi-card reveal reveal-delay-2">
+        <p class="testi-stars">★ ★ ★ ★ ★</p>
+        <p class="testi-quote">"The linen overcoat is the best investment I've made this year. Wears beautifully in both summer and autumn."</p>
+        <p class="testi-author">Sofía R. — Madrid</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <div class="newsletter reveal">
+    <p class="section-label">Stay Connected</p>
+    <h2 class="newsletter-title">Light arrives<br><em style="font-family:'Cormorant Garamond',serif;">in your inbox.</em></h2>
+    <p class="newsletter-sub">New arrivals, quiet stories, and early access to limited pieces.<br>No noise — just Feather.</p>
+    <div class="newsletter-form">
+      <input type="email" placeholder="Your email address" />
+      <button type="button">Subscribe</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-top">
+      <div>
+        <h3 class="footer-brand-name">Feather.</h3>
+        <p class="footer-tagline">Clothing for people who value silence, quality, and the weight of almost nothing.</p>
+        <div class="footer-socials">
+          <a href="#">IG</a>
+          <a href="#">TW</a>
+          <a href="#">PI</a>
+          <a href="#">TK</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="#">New Arrivals</a></li>
+          <li><a href="#">Women</a></li>
+          <li><a href="#">Men</a></li>
+          <li><a href="#">Accessories</a></li>
+          <li><a href="#">Sale</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">Our Story</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Stockists</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Sizing Guide</a></li>
+          <li><a href="#">Shipping & Returns</a></li>
+          <li><a href="#">Care Guide</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Feather. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Cookie Settings</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function animCursor() {
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animCursor);
+    }
+    animCursor();
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+        ring.style.opacity = '0';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+        ring.style.opacity = '0.6';
+      });
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
